@@ -1,7 +1,9 @@
 import cv2
 
 
-def add_shades(image, debug=False):
+def add_shades(in_file, out_file, debug=False):
+    image = cv2.imread(in_file)
+
     face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
     eye_cascade = cv2.CascadeClassifier("haarcascade_eye.xml")
 
@@ -44,6 +46,8 @@ def add_shades(image, debug=False):
             for (ex, ey, ew, eh) in eyes:
                 cv2.rectangle(roi_color, (ex, ey), (ex+ew, ey+eh), (0, 0, 255), 2)
 
+    cv2.imwrite(out_file, image)
+
 
 def overlay(bg, fg, x, y, w, h):
     fg = cv2.resize(fg, (w, h))
@@ -57,6 +61,4 @@ if __name__ == '__main__':
     import os
     import sys
 
-    image = cv2.imread(sys.argv[1])
-    add_shades(image, debug=(os.environ.get('DEBUG') == '1'))
-    cv2.imwrite("out.jpg", image)
+    add_shades(sys.argv[1], "out.jpg", debug=(os.environ.get('DEBUG') == '1'))

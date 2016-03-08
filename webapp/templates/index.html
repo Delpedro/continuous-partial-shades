@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Continuous Partial Shades</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='app.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+  <div class="row">
+  <h1 class="page-title">Continuous Partial Shades</h1>
+  </div>
+
+  <div class="row">
+    <div class="col-md-4">
+      <div class="drop-zone">Drop an image here</div>
+    </div>
+    <div class="col-md-8">
+      <div class="output"></div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript" src="{{ url_for('static', filename='jquery.js' )}}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='app.js' )}}"></script>
+
+</body>
+
+</html>

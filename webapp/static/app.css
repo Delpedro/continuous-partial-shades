@@ -1,0 +1,16 @@
+.drop-zone {
+  padding: 100px 50px;
+  border: 2px dotted #888;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 24px;
+  color: #888;
+}
+
+.drop-zone.hover {
+  background: yellow;
+}
+
+.output img {
+  max-width: 100%;
+}

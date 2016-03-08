@@ -1,7 +1,21 @@
 version: "2"
 
 services:
+  webapp:
+    build: ./webapp
+    volumes:
+      - ./webapp:/code
+    ports:
+      - "80:5000"
+    depends_on:
+      - redis
+
+  redis:
+    image: redis
+
   worker:
     build: ./worker
     volumes:
       - ./worker:/code
+    depends_on:
+      - redis
