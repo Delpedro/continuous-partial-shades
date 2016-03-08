@@ -3,8 +3,11 @@ import sys
 import os
 
 def overlay(bg, fg, x, y, w, h):
-    resized_fg = cv2.resize(fg, (w, h))
-    roi_color[y:y+h, x:x+w] = resized_fg
+    fg = cv2.resize(fg, (w, h))
+
+    for c in range(0,3):
+        bg[y:y+h, x:x+w, c] = \
+            fg[:,:,c] * (fg[:,:,3]/255.0) + bg[y:y+h, x:x+w, c] * (1.0 - fg[:,:,3]/255.0)
 
 
 debug = (os.environ.get('DEBUG') == '1')
@@ -16,7 +19,7 @@ image_path = sys.argv[1]
 face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 eye_cascade = cv2.CascadeClassifier("haarcascade_eye.xml")
 
-shades = cv2.imread("shades.png")
+shades = cv2.imread("shades.png", -1)
 
 # Read the image
 image = cv2.imread(image_path)
