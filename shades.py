@@ -2,6 +2,11 @@ import cv2
 import sys
 import os
 
+def overlay(bg, fg, x, y, w, h):
+    resized_fg = cv2.resize(fg, (w, h))
+    roi_color[y:y+h, x:x+w] = resized_fg
+
+
 debug = (os.environ.get('DEBUG') == '1')
 
 # Get user supplied values
@@ -49,12 +54,10 @@ for (x, y, w, h) in faces:
         shades_center_y = (eyes[0][1] + eyes[0][3]/2 + eyes[1][1] + eyes[1][3]/2)/2
         shades_y = shades_center_y - new_shades_h/2
 
-        resized_shades = cv2.resize(shades, (new_shades_w, new_shades_h))
-        roi_color[shades_y:shades_y+new_shades_h, shades_x:new_shades_w] = resized_shades
+        overlay(roi_color, shades, x=shades_x, y=shades_y, w=new_shades_w, h=new_shades_h)
 
     if debug:
         for (ex, ey, ew, eh) in eyes:
             cv2.rectangle(roi_color, (ex, ey), (ex+ew, ey+eh), (0, 0, 255), 2)
-
 
 cv2.imwrite("out.jpg", image)
