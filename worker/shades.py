@@ -8,10 +8,13 @@ def add_shades(in_file, out_file, debug=False):
     logger.debug('Reading {}'.format(in_file))
     image = cv2.imread(in_file)
 
+    if image is None:
+        raise Exception("Failed to read image")
+
     face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
     eye_cascade = cv2.CascadeClassifier("haarcascade_eye.xml")
-
     shades = cv2.imread("shades.png", -1)
+
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     faces = face_cascade.detectMultiScale(
@@ -42,7 +45,7 @@ def add_shades(in_file, out_file, debug=False):
 
             shades_x = 0
             shades_center_y = (eyes[0][1] + eyes[0][3]/2 + eyes[1][1] + eyes[1][3]/2)/2
-            shades_y = shades_center_y - new_shades_h/2
+            shades_y = int(shades_center_y - new_shades_h/2)
 
             logger.debug("    Overlaying shades at {}, {}".format(x+shades_x, y+shades_y))
             overlay(roi_color, shades, x=shades_x, y=shades_y, w=new_shades_w, h=new_shades_h)

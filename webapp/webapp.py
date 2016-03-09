@@ -1,22 +1,23 @@
+from PIL import Image
 from flask import Flask
-from flask import make_response
+from flask import send_file
 from flask import render_template
 from flask import request
 from redis import Redis
 from redis.exceptions import ConnectionError
 
+from frames import extract_frames, sequence_frames
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__)
-logger = app.logger
 redis = Redis(host="redis")
 
-# while True:
-#     try:
-#         redis.keys('*')
-#     except ConnectionError:
-#         logger.debug('Redis is unavailable - sleeping')
-#         sleep(1)
-
 redis.delete('frames_in', 'frames_out')
+
+FRAME_EXTENSION = 'jpg'
 
 
 @app.route('/')
@@ -29,12 +30,15 @@ def upload():
     file = request.files['file']
     extension = file.filename.rpartition('.')[2]
 
-    frames_in = [file.read()]
+    image = Image.open(file.stream)
+    image_format = image.format
+
+    frames_in = list(extract_frames(image, FRAME_EXTENSION))
     frames_out = [None for _ in frames_in]
     done = 0
 
     for idx, frame in enumerate(frames_in):
-        message = encode(idx, extension, frame)
+        message = encode(idx, FRAME_EXTENSION, frame)
         logger.debug('Sending: {}...'.format(repr(message[:50])))
         redis.rpush('frames_in', message)
 
@@ -46,12 +50,11 @@ def upload():
         idx, _, frame = decode(message)
         logger.debug("Frame no {}, {} bytes".format(idx, len(frame)))
 
-        frames_out[int(idx)] = frame
+        frames_out[idx] = frame
         done += 1
 
-    resp = make_response(frames_out[0])
-    resp.headers['Content-Type'] = request.headers['Content-Type']
-    return resp
+    processed_file = sequence_frames(frames_out, extension)
+    return send_file(processed_file)
 
 
 def encode(idx, extension, data):

@@ -39,7 +39,13 @@ $('.drop-zone')
           image.src = url;
           $('.output').empty().append(image);
         } else {
-          console.error(xhr.responseText);
+          if (xhr.response) {
+            var reader = new FileReader();
+            reader.addEventListener("loadend", function() {
+               console.error(reader.result)
+            });
+            reader.readAsText(xhr.response);
+          }
         }
       }
     };
