@@ -27,13 +27,14 @@ def index():
 @app.route('/upload', methods=['POST'])
 def upload():
     file = request.files['file']
+    extension = file.filename.rpartition('.')[2]
 
     frames_in = [file.read()]
     frames_out = [None for _ in frames_in]
     done = 0
 
     for idx, frame in enumerate(frames_in):
-        message = bytes(str(idx), encoding='ascii') + b':' + frame
+        message = encode(idx, extension, frame)
         logger.debug('Sending: {}...'.format(repr(message[:50])))
         redis.rpush('frames_in', message)
 
@@ -42,7 +43,7 @@ def upload():
         message = redis.blpop(['frames_out'])[1]
         logger.debug("Got {} bytes".format(len(message)))
 
-        idx, frame = message.split(b':', 1)
+        idx, _, frame = decode(message)
         logger.debug("Frame no {}, {} bytes".format(idx, len(frame)))
 
         frames_out[int(idx)] = frame
@@ -51,6 +52,20 @@ def upload():
     resp = make_response(frames_out[0])
     resp.headers['Content-Type'] = request.headers['Content-Type']
     return resp
+
+
+def encode(idx, extension, data):
+    return b':'.join([
+        str(idx).encode('ascii'),
+        extension.encode('ascii'),
+        data
+    ])
+
+
+def decode(message):
+    idx, extension, data = message.split(b':', 2)
+    return int(idx), extension.decode('ascii'), data
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)

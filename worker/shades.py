@@ -1,7 +1,11 @@
 import cv2
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 def add_shades(in_file, out_file, debug=False):
+    logger.debug('Reading {}'.format(in_file))
     image = cv2.imread(in_file)
 
     face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
@@ -18,7 +22,7 @@ def add_shades(in_file, out_file, debug=False):
         flags=cv2.CASCADE_SCALE_IMAGE
     )
 
-    print("Found {0} faces!".format(len(faces)))
+    logger.debug("Found {0} faces".format(len(faces)))
 
     for (x, y, w, h) in faces:
         if debug:
@@ -28,7 +32,7 @@ def add_shades(in_file, out_file, debug=False):
         roi_color = image[y:y+h, x:x+w]
         eyes = eye_cascade.detectMultiScale(roi_gray)
 
-        print("Found {0} eyes!".format(len(eyes)))
+        logger.debug("  Found {0} eyes".format(len(eyes)))
 
         if len(eyes) == 2:
             shades_h = shades.shape[0]
@@ -40,12 +44,14 @@ def add_shades(in_file, out_file, debug=False):
             shades_center_y = (eyes[0][1] + eyes[0][3]/2 + eyes[1][1] + eyes[1][3]/2)/2
             shades_y = shades_center_y - new_shades_h/2
 
+            logger.debug("    Overlaying shades at {}, {}".format(x+shades_x, y+shades_y))
             overlay(roi_color, shades, x=shades_x, y=shades_y, w=new_shades_w, h=new_shades_h)
 
         if debug:
             for (ex, ey, ew, eh) in eyes:
                 cv2.rectangle(roi_color, (ex, ey), (ex+ew, ey+eh), (0, 0, 255), 2)
 
+    logger.debug('Writing {}'.format(out_file))
     cv2.imwrite(out_file, image)
 
 
