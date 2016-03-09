@@ -29,6 +29,8 @@ def sequence_frames(frames, extension):
     frame_files = [save_frame(data, extension) for data in frames]
 
     cmd = ['convert']
+    if extension == 'gif':
+        cmd += ['-loop', '0', '-delay', '4', '-layers', 'Optimize']
     cmd += frame_files
     cmd.append(out_file)
     check_call(cmd)

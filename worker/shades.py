@@ -25,9 +25,9 @@ def add_shades(in_file, out_file, debug=False):
         flags=cv2.CASCADE_SCALE_IMAGE
     )
 
-    logger.debug("Found {0} faces".format(len(faces)))
-
     for (x, y, w, h) in faces:
+        logger.debug("Found face at ({}, {}), size: ({}, {})".format(x, y, w, h))
+
         if debug:
             cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
@@ -43,12 +43,13 @@ def add_shades(in_file, out_file, debug=False):
             new_shades_w = w
             new_shades_h = int(w * (shades_h/shades_w))
 
-            shades_x = 0
-            shades_center_y = (eyes[0][1] + eyes[0][3]/2 + eyes[1][1] + eyes[1][3]/2)/2
-            shades_y = int(shades_center_y - new_shades_h/2)
+            shades_x = x
+            shades_center_y_from_top_of_face = (eyes[0][1] + eyes[0][3]/2 + eyes[1][1] + eyes[1][3]/2)/2
+            shades_y = y + int(shades_center_y_from_top_of_face - new_shades_h/2)
 
-            logger.debug("    Overlaying shades at {}, {}".format(x+shades_x, y+shades_y))
-            overlay(roi_color, shades, x=shades_x, y=shades_y, w=new_shades_w, h=new_shades_h)
+            logger.debug("    Overlaying shades at ({}, {}), size: ({}, {})".format(
+                shades_x, shades_y, new_shades_w, new_shades_h))
+            overlay(image, shades, x=shades_x, y=shades_y, w=new_shades_w, h=new_shades_h)
 
         if debug:
             for (ex, ey, ew, eh) in eyes:
