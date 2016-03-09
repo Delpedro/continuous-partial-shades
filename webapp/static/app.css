@@ -1,3 +1,14 @@
+h1, .drop-zone {
+  font-weight: 200;
+}
+
+h1 {
+  font-size: 48px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding-bottom: 30px;
+}
+
 .drop-zone {
   padding: 100px 50px;
   border: 2px dotted #888;
@@ -8,7 +19,7 @@
 }
 
 .drop-zone.hover {
-  background: yellow;
+  background: #ffd;
 }
 
 .output img {
