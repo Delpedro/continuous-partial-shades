@@ -9,17 +9,26 @@ h1 {
   padding-bottom: 30px;
 }
 
-.drop-zone {
-  padding: 100px 50px;
-  border: 2px dotted #888;
+.drop-zone, .output {
+  min-height: 300px;
   border-radius: 4px;
   text-align: center;
+}
+
+.drop-zone {
+  padding-top: 130px;
+  border: 2px dotted #888;
   font-size: 24px;
   color: #888;
 }
 
 .drop-zone.hover {
   background: #ffd;
+}
+
+.output {
+  background: #ddd;
+  padding: 20px;
 }
 
 .output img {

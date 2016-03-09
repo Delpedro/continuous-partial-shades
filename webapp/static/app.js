@@ -23,6 +23,9 @@ $('.drop-zone')
       return;
     }
 
+    var spinner = new Spinner().spin();
+    $('.output').empty().append(spinner.el);
+
     var file = event.originalEvent.dataTransfer.files[0];
     var formData = new FormData();
     formData.append('file', file);
