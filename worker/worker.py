@@ -23,6 +23,7 @@ def process(frame, extension):
     out_file = NamedTemporaryFile(suffix=suffix, delete=False)
     out_file.close()
 
+    sleep(1)
     shades.add_shades(in_file.name, out_file.name)
 
     return open(out_file.name, 'rb').read()
