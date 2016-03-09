@@ -3,8 +3,6 @@ version: "2"
 services:
   webapp:
     build: ./webapp
-    volumes:
-      - ./webapp:/code
     ports:
       - "80:5000"
     depends_on:
@@ -15,7 +13,5 @@ services:
 
   worker:
     build: ./worker
-    volumes:
-      - ./worker:/code
     depends_on:
       - redis
