@@ -1,26 +1,28 @@
 import tempfile
 import subprocess
+import os
+import glob
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-def extract_frames(image, extension):
-    logger.debug('Extracting frames from {} as {}'.format(image.format, extension))
+def extract_frames(stream, in_extension, out_extension):
+    logger.debug('Extracting frames from {} as {}'.format(in_extension, out_extension))
 
-    _, out_file = tempfile.mkstemp('.{}'.format(extension))
-    idx = 0
+    _, in_file = tempfile.mkstemp(suffix='.{}'.format(in_extension))
+    with open(in_file, 'w+b') as f:
+        f.write(stream.read())
 
-    while True:
-        try:
-            image.convert('RGB').save(out_file)
-            data = open(out_file, 'rb').read()
-            logger.debug('Frame {}: {} bytes'.format(idx, len(data)))
-            yield data
-            idx += 1
-            image.seek(idx)
-        except EOFError:
-            break
+    out_dir = tempfile.mkdtemp()
+    save_pattern = '%06d.{}'.format(out_extension)
+    search_pattern = os.path.join(out_dir, '*.{}'.format(out_extension))
+
+    check_call(['convert', in_file, os.path.join(out_dir, save_pattern)])
+
+    for path in sorted(glob.glob(search_pattern)):
+        with open(path, 'r+b') as f:
+            yield f.read()
 
 
 def sequence_frames(frames, extension):

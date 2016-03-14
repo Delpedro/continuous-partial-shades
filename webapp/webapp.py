@@ -1,4 +1,3 @@
-from PIL import Image
 from flask import Flask
 from flask import send_file
 from flask import render_template
@@ -30,10 +29,7 @@ def upload():
     file = request.files['file']
     extension = file.filename.rpartition('.')[2]
 
-    image = Image.open(file.stream)
-    image_format = image.format
-
-    frames_in = list(extract_frames(image, FRAME_EXTENSION))
+    frames_in = list(extract_frames(file.stream, extension, FRAME_EXTENSION))
     frames_out = [None for _ in frames_in]
     done = 0
 
