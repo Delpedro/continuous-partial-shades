@@ -5,6 +5,8 @@ from flask import request
 from redis import Redis
 from redis.exceptions import ConnectionError
 
+import os
+
 from frames import extract_frames, sequence_frames
 
 import logging
@@ -49,8 +51,11 @@ def upload():
         frames_out[idx] = frame
         done += 1
 
-    processed_file = sequence_frames(frames_out, extension)
-    return send_file(processed_file)
+    try:
+        processed_file = sequence_frames(frames_out, extension)
+        return send_file(processed_file)
+    finally:
+        os.remove(processed_file)
 
 
 def encode(idx, extension, data):

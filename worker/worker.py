@@ -3,6 +3,7 @@ from redis import Redis
 from redis.exceptions import ConnectionError
 from time import sleep
 from tempfile import NamedTemporaryFile
+import os
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -16,17 +17,23 @@ redis.delete('frames_in', 'frames_out')
 def process(frame, extension):
     suffix = '.{}'.format(extension)
 
-    in_file = NamedTemporaryFile(suffix=suffix, delete=False)
-    in_file.write(frame)
-    in_file.close()
+    try:
+        in_file = NamedTemporaryFile(suffix=suffix, delete=False)
+        in_file.write(frame)
+        in_file.close()
 
-    out_file = NamedTemporaryFile(suffix=suffix, delete=False)
-    out_file.close()
+        out_file = NamedTemporaryFile(suffix=suffix, delete=False)
+        out_file.close()
 
-    sleep(1)
-    shades.add_shades(in_file.name, out_file.name)
+        sleep(1)
+        shades.add_shades(in_file.name, out_file.name)
 
-    return open(out_file.name, 'rb').read()
+        return open(out_file.name, 'rb').read()
+    finally:
+        if in_file:
+            os.remove(in_file.name)
+        if out_file:
+            os.remove(out_file.name)
 
 
 def encode(idx, extension, data):

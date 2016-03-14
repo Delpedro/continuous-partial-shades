@@ -1,6 +1,7 @@
 import tempfile
 import subprocess
 import os
+import shutil
 import glob
 
 import logging
@@ -10,32 +11,41 @@ logger = logging.getLogger(__name__)
 def extract_frames(stream, in_extension, out_extension):
     logger.debug('Extracting frames from {} as {}'.format(in_extension, out_extension))
 
-    _, in_file = tempfile.mkstemp(suffix='.{}'.format(in_extension))
-    with open(in_file, 'w+b') as f:
-        f.write(stream.read())
+    try:
+        _, in_file = tempfile.mkstemp(suffix='.{}'.format(in_extension))
+        with open(in_file, 'w+b') as f:
+            f.write(stream.read())
 
-    out_dir = tempfile.mkdtemp()
-    save_pattern = '%06d.{}'.format(out_extension)
-    search_pattern = os.path.join(out_dir, '*.{}'.format(out_extension))
+        out_dir = tempfile.mkdtemp()
+        save_pattern = '%06d.{}'.format(out_extension)
+        search_pattern = os.path.join(out_dir, '*.{}'.format(out_extension))
 
-    check_call(['convert', in_file, os.path.join(out_dir, save_pattern)])
+        check_call(['convert', in_file, os.path.join(out_dir, save_pattern)])
 
-    for path in sorted(glob.glob(search_pattern)):
-        with open(path, 'r+b') as f:
-            yield f.read()
-
+        for path in sorted(glob.glob(search_pattern)):
+            with open(path, 'r+b') as f:
+                yield f.read()
+    finally:
+        if in_file:
+            os.remove(in_file)
+        if out_dir:
+            shutil.rmtree(out_dir)
 
 def sequence_frames(frames, extension):
     _, out_file = tempfile.mkstemp('.{}'.format(extension))
 
-    frame_files = [save_frame(data, extension) for data in frames]
+    try:
+        frame_files = [save_frame(data, extension) for data in frames]
 
-    cmd = ['convert']
-    if extension == 'gif':
-        cmd += ['-loop', '0', '-delay', '4', '-layers', 'Optimize']
-    cmd += frame_files
-    cmd.append(out_file)
-    check_call(cmd)
+        cmd = ['convert']
+        if extension == 'gif':
+            cmd += ['-loop', '0', '-delay', '4', '-layers', 'Optimize']
+        cmd += frame_files
+        cmd.append(out_file)
+        check_call(cmd)
+    finally:
+        for file in frame_files:
+            os.remove(file)
 
     return out_file
 
